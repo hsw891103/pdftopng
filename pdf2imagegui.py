@@ -3,6 +3,7 @@ from tkinter import filedialog, messagebox, ttk
 from pdf2image import convert_from_path
 from PIL import Image, ImageTk
 import os
+import sys
 import time
 import threading
 import webbrowser
@@ -117,9 +118,16 @@ def start_conversion():
     thread = threading.Thread(target=convert_pdf_to_png, args=(pdf_path, progress_var, progress_label, pdf_button, start_button))
     thread.start()
 
+# 실행 파일 내부에서 경로 찾기
+def resource_path(relative_path):
+    """ PyInstaller로 패키징될 때 실행 파일에서 리소스 경로 찾기 """
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return relative_path
+
 # 홍보 이미지 삽입 함수
 def add_promo_image():
-    image_path = "abcd.png"  # 홍보 이미지 파일 경로
+    image_path = resource_path("abcd.png") # 홍보 이미지 파일 경로
     img = Image.open(image_path)
     img = img.resize((200, 100))  # 적절한 크기로 조절
     img_tk = ImageTk.PhotoImage(img)
@@ -150,7 +158,7 @@ file_frame.grid(row=1, column=0, columnspan=2, pady=5, padx=5)
 pdf_entry = tk.Entry(file_frame, width=40)
 pdf_entry.grid(row=0, column=0, padx=(0, 5))  # 오른쪽 여백 추가
 
-pdf_button = tk.Button(file_frame, text="파일 선택", command=lambda: print("파일 선택"), background="tomato")
+pdf_button = tk.Button(file_frame, text="파일 선택", command=select_pdf_file, background="tomato")
 pdf_button.grid(row=0, column=1)
 
 # 진행 상태 레이블
@@ -163,7 +171,7 @@ progress_bar = ttk.Progressbar(root, variable=progress_var, maximum=100, length=
 progress_bar.grid(row=4, column=0, columnspan=2, pady=10)
 
 # 변환 시작 버튼
-start_button = tk.Button(root, text="변환 시작", command=lambda: print("변환 시작"), background="steel blue")
+start_button = tk.Button(root, text="변환 시작", command=start_conversion, background="steel blue")
 start_button.grid(row=2, column=0, columnspan=2, pady=20)
 
 # 홍보 이미지 추가
